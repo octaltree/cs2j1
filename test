@@ -1,0 +1,5 @@
+sigma a b c d e
+stnum 4
+state 2 0.2 0.2 0.2 0.2 0.2
+state 1 0.2 0.2 0.2 0.2 0.2
+delta 0 1 0.95
