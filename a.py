@@ -7,8 +7,8 @@ undefined = None
 def main():
     tmp = HiddenMarkov()
     tmp.read()
-    print(tmp.generate())
-    return undefined
+    print(tmp.generate(5))
+    return 0
 
 class HiddenMarkov:
     __alphs = None
@@ -30,7 +30,7 @@ class HiddenMarkov:
     def generate(self, maxlen=128):
         currentst = 0
         res = ""
-        for i in range(maxlen):
+        for i in range(maxlen+1):
             if currentst == self.__stnum - 1:
                 break
             if currentst != 0:
