@@ -7,7 +7,7 @@ undefined = None
 def main():
     tmp = HiddenMarkov()
     tmp.read()
-    print(tmp.generate(5))
+    print(tmp.generate(100))
     return 0
 
 class HiddenMarkov:
