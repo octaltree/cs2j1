@@ -3,16 +3,17 @@
 import sys
 import random
 import numpy as np
+import math
 undefined = None
 
 def main():
     hm = HiddenMarkov()
     hm.read()
     (string, sts) = hm.generate(100)
-    pred = hm.viterbi(string)
     strs = lambda xs: [str(x) for x in xs]
     print(string)
     print(''.join(strs(sts)))
+    pred = hm.viterbi(string)
     print(''.join(strs(pred)))
     return 0
 
@@ -83,10 +84,17 @@ class Viterbi:
         self.__states = states
         self.__delta = delta
     def predict(self, string):
-        self.__dp = np.zeros((self.__stnum, len(string)))
-        for i in range(self.__stnum):
-            for j in range(len(string)):
-                print(self.__dp[i][j])
+        if self.__stnum == 0 or len(string) == 0:
+            return []
+        # 対数を取り確率1を0, -INFを1と表す
+        self.__dp = np.ones((self.__stnum, len(string)))
+        self.__dp[0][0] = 0
+        for idx in range(1, len(string)):
+            for st in range(1, self.__stnum - 1):
+                e = lambda x, a: self.__states[x][''.join(self.__alphs).index(a)]
+                m = max([self.__dp[j][st-1] * self.__delta[j][st] for j in range(self.__stnum)])
+                self.__dp[st][idx] = e(st, string[idx]) * m
+        print(self.__dp)
         return []
 
 if __name__ == "__main__":
