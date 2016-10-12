@@ -93,7 +93,9 @@ class Viterbi:
                 e = lambda x, a: self.__states[x][''.join(self.__alphs).index(a)]
                 m = max([self.__dp[j][st-1] * self.__delta[j][st] for j in range(self.__stnum - 1)])
                 self.__dp[st][idx] = e(st, string[idx]) * m
+        toend = [self.__delta[st][self.__stnum] * self.__dp[st][-1] for st in range(self.__stnum - 1)]
         print(self.__dp)
+        print(toend)
         currentst = self.__stnum
         res = []
         #while currentst != 0:
