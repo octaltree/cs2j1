@@ -30,13 +30,15 @@ class HiddenMarkov:
     def generate(self, maxlen=128):
         currentst = 0
         res = ""
+        sts = []
         for i in range(maxlen+1):
             if currentst == self.__stnum - 1:
                 break
             if currentst != 0:
+                sts += [currentst]
                 res += self.__getAlpha(currentst)
             currentst = self.__trans(currentst)
-        return res
+        return (res, sts)
     def read(self):
         # ダメならindex out of rangeで死んで頼む
         lines = sys.stdin.read().split('\n')
