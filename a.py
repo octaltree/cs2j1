@@ -5,9 +5,14 @@ import random
 undefined = None
 
 def main():
-    tmp = HiddenMarkov()
-    tmp.read()
-    print(tmp.generate(100))
+    hm = HiddenMarkov()
+    hm.read()
+    (string, sts) = hm.generate(100)
+    pred = hm.viterbi(string)
+    strs = lambda xs: [str(x) for x in xs]
+    print(string)
+    print(''.join(strs(sts)))
+    print(''.join(strs(pred)))
     return 0
 
 class HiddenMarkov:
