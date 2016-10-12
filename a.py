@@ -66,6 +66,18 @@ class HiddenMarkov:
             self.__delta[t[0]][t[1]] = t[2]
     def debugVars(self):
         print(self.__dict__)
+    def viterbi(self, string):
+        v = Viterbi(self.__alphs, self.__stnum, self.__states, self.__delta)
+        return v.predict(string)
+
+class Viterbi:
+    def __init__(self, alphs, stnum, states, delta):
+        self.__alphs = alphs
+        self.__stnum = stnum
+        self.__states = states
+        self.__delta = delta
+    def predict(self, string):
+        return []
 
 if __name__ == "__main__":
     exit(main())
