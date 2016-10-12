@@ -91,12 +91,13 @@ class Viterbi:
         for idx in range(1, len(string)):
             for st in range(1, self.__stnum - 1):
                 e = lambda x, a: self.__states[x][''.join(self.__alphs).index(a)]
-                m = max([self.__dp[j][st-1] * self.__delta[j][st] for j in range(self.__stnum)])
+                m = max([self.__dp[j][st-1] * self.__delta[j][st] for j in range(self.__stnum - 1)])
                 self.__dp[st][idx] = e(st, string[idx]) * m
+        print(self.__dp)
         currentst = self.__stnum
         res = []
-        while currentst != 0:
-            res = [currentst] + res
+        #while currentst != 0:
+        #    res = [currentst] + res
         return res
 
 if __name__ == "__main__":
