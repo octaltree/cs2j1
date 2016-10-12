@@ -86,16 +86,18 @@ class Viterbi:
     def predict(self, string):
         if self.__stnum == 0 or len(string) == 0:
             return []
-        # 対数を取り確率1を0, -INFを1と表す
-        self.__dp = np.ones((self.__stnum, len(string)))
-        self.__dp[0][0] = 0
+        self.__dp = np.zeros((self.__stnum, len(string)))
+        self.__dp[0][0] = 1
         for idx in range(1, len(string)):
             for st in range(1, self.__stnum - 1):
                 e = lambda x, a: self.__states[x][''.join(self.__alphs).index(a)]
                 m = max([self.__dp[j][st-1] * self.__delta[j][st] for j in range(self.__stnum)])
                 self.__dp[st][idx] = e(st, string[idx]) * m
-        print(self.__dp)
-        return []
+        currentst = self.__stnum
+        res = []
+        while currentst != 0:
+            res = [currentst] + res
+        return res
 
 if __name__ == "__main__":
     exit(main())
