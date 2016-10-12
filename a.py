@@ -2,6 +2,7 @@
 
 import sys
 import random
+import numpy as np
 undefined = None
 
 def main():
@@ -82,6 +83,10 @@ class Viterbi:
         self.__states = states
         self.__delta = delta
     def predict(self, string):
+        self.__dp = np.zeros((self.__stnum, len(string)))
+        for i in range(self.__stnum):
+            for j in range(len(string)):
+                print(self.__dp[i][j])
         return []
 
 if __name__ == "__main__":
