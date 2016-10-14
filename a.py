@@ -11,7 +11,7 @@ def main():
     hm.read()
     (string, sts) = hm.generate(100)
     strs = lambda xs: [str(x) for x in xs]
-    print(string)
+    print(' {0} '.format(string))
     print(''.join(strs(sts)))
     pred = hm.viterbi(string)
     print(''.join(strs(pred)))
@@ -37,7 +37,7 @@ class HiddenMarkov:
     def generate(self, maxlen=128):
         currentst = 0
         res = ""
-        sts = []
+        sts = [0]
         for i in range(maxlen+1):
             if currentst == self.__stnum - 1:
                 break
@@ -45,7 +45,7 @@ class HiddenMarkov:
                 sts += [currentst]
                 res += self.__getAlpha(currentst)
             currentst = self.__trans(currentst)
-        return (res, sts)
+        return (res, sts + [self.__stnum - 1])
     def read(self):
         # ダメならindex out of rangeで死んで頼む
         lines = sys.stdin.read().split('\n')
@@ -86,20 +86,28 @@ class Viterbi:
     def predict(self, string):
         if self.__stnum == 0 or len(string) == 0:
             return []
+        # dp表埋め
         self.__dp = np.zeros((self.__stnum, len(string)))
         self.__dp[0][0] = 1
         for idx in range(1, len(string)):
             for st in range(1, self.__stnum - 1):
-                e = lambda x, a: self.__states[x][''.join(self.__alphs).index(a)]
-                m = max([self.__dp[j][st-1] * self.__delta[j][st] for j in range(self.__stnum - 1)])
+                e = lambda x, a: (
+                        self.__states[x][''.join(self.__alphs).index(a)])
+                m = max([(
+                    self.__dp[j][st-1] * self.__delta[j][st])
+                    for j in range(self.__stnum - 1)])
                 self.__dp[st][idx] = e(st, string[idx]) * m
         toend = [(
             self.__delta[st][-1] * self.__dp[st][-1]
             ) for st in range(self.__stnum - 1)]
-        currentst = self.__stnum
-        res = []
-        #while currentst != 0:
-        #    res = [currentst] + res
+        # 表読み
+        currentst = np.argmax(toend)
+        res = [currentst, self.__stnum - 1]
+        for i in reversed(range(len(string))):
+            currentst = np.argmax([(
+                self.__dp[st][i] * self.__dp[st][currentst]
+                )for st in range(self.__stnum - 1)])
+            res = [currentst] + res
         return res
 
 if __name__ == "__main__":
