@@ -15,8 +15,6 @@ def main():
     print(''.join(strs(sts)))
     pred = hm.viterbi(string)
     print(''.join(strs(pred)))
-    #pred = hm.viterbi('ddd')
-    #print(''.join(strs(pred)))
     return 0
 
 class HiddenMarkov:
@@ -95,19 +93,12 @@ class Viterbi:
             for st in range(1, self.__stnum - 1):
                 e = lambda x, a: (
                         self.__states[x][''.join(self.__alphs).index(a)])
-                #print('stnum {0}'.format(self.__stnum))
-                #print(list(range(self.__stnum - 1)))
-                #print(self.__dp)
-                #print(self.__delta)
                 m = max([self.__dp[j][idx-1] * self.__delta[j][st]
                     for j in range(self.__stnum - 1)])
-                #m = max([self.__dp[j][st-1] * self.__delta[j][st]
-                #    for j in range(self.__stnum - 1)])
                 self.__dp[st][idx] = e(st, string[idx]) * m
         toend = [self.__delta[st][-1] * self.__dp[st][-1]
                 for st in range(self.__stnum - 1)]
         # 表読み
-        #print(self.__dp)
         currentst = np.argmax(toend)
         res = [currentst, self.__stnum - 1]
         for i in reversed(range(len(string))):
