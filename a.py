@@ -7,18 +7,21 @@ import math
 undefined = None
 
 def main():
+    strs = lambda xs: [str(x) for x in xs]
+    mean = lambda xs: sum(xs) / len(xs)
     hm = HiddenMarkov()
     hm.read()
-    (string, sts) = hm.generate(100)
-    strs = lambda xs: [str(x) for x in xs]
-    print(' {0} '.format(string))
-    print(''.join(strs(sts)))
-    pred = hm.viterbi(string)
-    print(''.join(strs(pred)))
-    print(len(
-        [t for t in list(zip(sts, pred))[1:-1] if t[0] == t[1]]
-        ) / len(sts))
+    print(np.average(list(map(lambda i: generatePredict(hm)[3], range(1000)))))
     return 0
+
+def generatePredict(hm):
+    (string, sts) = hm.generate(100)
+    pred = hm.viterbi(string)
+    accuracy = 1 if len(pred) <= 2 else (
+            len([t for t in list(zip(sts, pred))[1:-1] if t[0] == t[1]]) /
+            (len(sts) - 2)
+            )
+    return (string, sts,  pred, accuracy)
 
 class HiddenMarkov:
     __alphs = None
@@ -86,29 +89,36 @@ class Viterbi:
         self.__stnum = stnum
         self.__states = states
         self.__delta = delta
+    def __e(self, st, alph):
+        return self.__states[st][''.join(self.__alphs).index(alph)]
+    def __log(self, x):
+        return -np.inf if x == 0 else math.log(x)
+    def __fill(self, string):
+        for idx in range(len(string)):
+            for st in range(1, self.__stnum - 1):
+                m = np.max([
+                    self.__dp[j][idx] + self.__log(self.__delta[j][st])
+                    for j in range(self.__stnum - 1)
+                    ])
+                self.__dp[st][idx+1] = self.__log(self.__e(st, string[idx])) + m
+    def __read(self, length):
+        current = self.__stnum - 1
+        path = []
+        for idx in reversed(range(length + 1)):
+            path = [current] + path
+            current = np.argmax([
+                self.__dp[st][idx] + self.__delta[st][current]
+                for st in range(self.__stnum - 1)
+                ])
+        path = [0] + path
+        return path
     def predict(self, string):
         if self.__stnum == 2 or len(string) == 0:
             return [0, self.__stnum - 1]
-        # dp表埋め
-        self.__dp = np.zeros((self.__stnum, len(string)))
-        self.__dp[0][0] = 1
-        for idx in range(1, len(string)):
-            for st in range(1, self.__stnum - 1):
-                e = lambda x, a: (
-                        self.__states[x][''.join(self.__alphs).index(a)])
-                m = max([self.__dp[j][idx-1] * self.__delta[j][st]
-                    for j in range(self.__stnum - 1)])
-                self.__dp[st][idx] = e(st, string[idx]) * m
-        toend = [self.__delta[st][-1] * self.__dp[st][-1]
-                for st in range(self.__stnum - 1)]
-        # 表読み
-        currentst = np.argmax(toend)
-        res = [currentst, self.__stnum - 1]
-        for i in reversed(range(len(string))):
-            currentst = np.argmax([self.__dp[st][i] * self.__dp[st][currentst]
-                for st in range(self.__stnum - 1)])
-            res = [currentst] + res
-        return res
+        self.__dp = np.full((self.__stnum, len(string)+1), -np.inf)
+        self.__dp[0][0] = 0
+        self.__fill(string)
+        return self.__read(len(string))
 
 if __name__ == "__main__":
     exit(main())
