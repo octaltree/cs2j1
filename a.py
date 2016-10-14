@@ -15,6 +15,9 @@ def main():
     print(''.join(strs(sts)))
     pred = hm.viterbi(string)
     print(''.join(strs(pred)))
+    print(len(
+        [t for t in list(zip(sts, pred))[1:-1] if t[0] == t[1]]
+        ) / len(sts))
     return 0
 
 class HiddenMarkov:
