@@ -4,6 +4,7 @@ import sys
 import random
 import numpy as np
 import math
+from functools import reduce
 undefined = None
 
 def main():
@@ -15,10 +16,10 @@ def main():
     #tmp = generateViterbi(hm)
     #print(" {0} \n{1}\n{2}".format(tmp[0], join(tmp[1]), join(tmp[2])))
     #print(tmp[3])
-    test1(hm)
+    task2(hm)
     return 0
 
-def test1(hm):
+def task1(hm):
     print(hm.generate(maxlen=0))
     print(hm.generate(maxlen=1))
     print(hm.generate(maxlen=2))
@@ -26,6 +27,21 @@ def test1(hm):
     print(hm.generateGoaled(maxlen=1))
     print(hm.generateGoaled(maxlen=2))
     print(hm.generateGoaled(maxlen=100))
+
+def task2(hm):
+    xs = []
+    while sum([len(x[0]) for x in xs]) < 1000:
+        (string, sts) = hm.generateGoaled(100)
+        pred = hm.viterbi(string)
+        xs += [(string, sts, pred)]
+    strs = lambda xs: [str(x) for x in xs]
+    join = lambda xs: ''.join(strs(xs))
+    print(' {0} \n{1}\n{2}'.format(xs[-1][0], join(xs[-1][1]), join(xs[-1][2])))
+    num = sum([len(x[1]) - 2 for x in xs])
+    numcorrect = sum([
+        len([t for t in list(zip(*x[1:3]))[1:-1] if t[0] == t[1]])
+        for x in xs])
+    print('文字列1000以上での正答率 {}'.format(numcorrect/num))
 
 def generateViterbi(hm):
     (string, sts) = hm.generate(100)
