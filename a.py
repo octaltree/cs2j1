@@ -11,11 +11,21 @@ def main():
     join = lambda xs: ''.join(strs(xs))
     hm = HiddenMarkov()
     hm.read()
-    print(np.average(list(map(lambda i: generateViterbi(hm)[3], range(1000)))))
-    tmp = generateViterbi(hm)
-    print(" {0} \n{1}\n{2}".format(tmp[0], join(tmp[1]), join(tmp[2])))
-    print(tmp[3])
+    #print(np.average(list(map(lambda i: generateViterbi(hm)[3], range(1000)))))
+    #tmp = generateViterbi(hm)
+    #print(" {0} \n{1}\n{2}".format(tmp[0], join(tmp[1]), join(tmp[2])))
+    #print(tmp[3])
+    test1(hm)
     return 0
+
+def test1(hm):
+    print(hm.generate(maxlen=0))
+    print(hm.generate(maxlen=1))
+    print(hm.generate(maxlen=2))
+    print(hm.generate(maxlen=100))
+    print(hm.generateGoaled(maxlen=1))
+    print(hm.generateGoaled(maxlen=2))
+    print(hm.generateGoaled(maxlen=100))
 
 def generateViterbi(hm):
     (string, sts) = hm.generate(100)
@@ -48,13 +58,18 @@ class HiddenMarkov:
         res = ""
         sts = [0]
         for i in range(maxlen+1):
-            if currentst == self.__stnum - 1:
-                break
             if currentst != 0:
                 sts += [currentst]
+                if currentst == self.__stnum - 1:
+                    break
                 res += self.__getAlpha(currentst)
             currentst = self.__trans(currentst)
-        return (res, sts + [self.__stnum - 1])
+        return (res, sts)
+    def generateGoaled(self, maxlen=128):
+        while True:
+            tmp = self.generate(maxlen=maxlen)
+            if tmp[1][-1] == self.__stnum - 1:
+                return tmp
     def read(self):
         # ダメならindex out of rangeで死んで頼む
         lines = sys.stdin.read().split('\n')
