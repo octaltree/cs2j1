@@ -8,13 +8,16 @@ undefined = None
 
 def main():
     strs = lambda xs: [str(x) for x in xs]
-    mean = lambda xs: sum(xs) / len(xs)
+    join = lambda xs: ''.join(strs(xs))
     hm = HiddenMarkov()
     hm.read()
-    print(np.average(list(map(lambda i: generatePredict(hm)[3], range(1000)))))
+    print(np.average(list(map(lambda i: generateViterbi(hm)[3], range(1000)))))
+    tmp = generateViterbi(hm)
+    print(" {0} \n{1}\n{2}".format(tmp[0], join(tmp[1]), join(tmp[2])))
+    print(tmp[3])
     return 0
 
-def generatePredict(hm):
+def generateViterbi(hm):
     (string, sts) = hm.generate(100)
     pred = hm.viterbi(string)
     accuracy = 1 if len(pred) <= 2 else (
