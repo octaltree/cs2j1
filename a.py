@@ -41,18 +41,30 @@ def task2(hm):
     print('文字列1000以上での正答率 {}'.format(numcorrect/num))
 
 def task3(hm):
-    ts = [hm.generate(100) for i in range(1)]
-    #def obs(tmp, t):
-    #    # tmp 途中結果
-    #    # return = (states, delta)
-    #    (states, delta) = tmp
-    #    (string, sts) = t
-    #def toFloat(states, delta):
-    #    pass
-    #return toFloat(*reduce(obs, ts,
-    #    (None,
-    #        [[0 for i in range(n)] for j in range(n)])
-    #    )
+    ts = [hm.generate(100) for i in range(2)]
+    (states, delta) = count(hm, ts)
+    print(states)
+    print(delta)
+
+def count(hm, ts):
+    firststates = [None,
+            *[np.zeros(len(hm.getAlphs())) for i in range(hm.getStnum()-2)],
+            None]
+    firstdelta = [[0 for i in range(hm.getStnum())]
+            for j in range(hm.getStnum())]
+    def obs(tmp, t):
+        # tmp 途中結果
+        # return = (states, delta)
+        (states, delta) = tmp
+        (string, sts) = t
+        return tmp
+    def fmt(states, delta):
+        finalstates = tuple([
+                None if i is None else tuple([float(j) for j in i])
+                for i in states])
+        finaldelta = [[float(j) for j in i] for i in delta]
+        return (finalstates, finaldelta)
+    return fmt(*reduce(obs, ts, (firststates, firstdelta)))
 
 class HiddenMarkov:
     __alphs = None # :: (char,)
