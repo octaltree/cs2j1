@@ -48,9 +48,10 @@ def task3(hm):
 
 def count(hm, ts):
     firststates = [None,
-            *[np.zeros(len(hm.getAlphs())) for i in range(hm.getStnum()-2)],
+            *[[(0, 0) for j in range(len(hm.getAlphs()))]
+                for i in range(hm.getStnum()-2)],
             None]
-    firstdelta = [[0 for i in range(hm.getStnum())]
+    firstdelta = [[(0, 0) for i in range(hm.getStnum())]
             for j in range(hm.getStnum())]
     def obs(tmp, t):
         # tmp 途中結果
@@ -59,10 +60,11 @@ def count(hm, ts):
         (string, sts) = t
         return tmp
     def fmt(states, delta):
+        flt = lambda t: t[0] / t[1] if t[1] != 0 else 0
         finalstates = tuple([
-                None if i is None else tuple([float(j) for j in i])
+                None if i is None else tuple([flt(j) for j in i])
                 for i in states])
-        finaldelta = [[float(j) for j in i] for i in delta]
+        finaldelta = [[flt(j) for j in i] for i in delta]
         return (finalstates, finaldelta)
     return fmt(*reduce(obs, ts, (firststates, firstdelta)))
 
