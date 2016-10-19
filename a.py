@@ -12,10 +12,6 @@ def main():
     join = lambda xs: ''.join(strs(xs))
     hm = HiddenMarkov()
     hm.read()
-    #print(np.average(list(map(lambda i: generateViterbi(hm)[3], range(1000)))))
-    #tmp = generateViterbi(hm)
-    #print(" {0} \n{1}\n{2}".format(tmp[0], join(tmp[1]), join(tmp[2])))
-    #print(tmp[3])
     task2(hm)
     return 0
 
@@ -43,14 +39,8 @@ def task2(hm):
         for x in xs])
     print('文字列1000以上での正答率 {}'.format(numcorrect/num))
 
-def generateViterbi(hm):
-    (string, sts) = hm.generate(100)
-    pred = hm.viterbi(string)
-    accuracy = 1 if len(pred) <= 2 else (
-            len([t for t in list(zip(sts, pred))[1:-1] if t[0] == t[1]]) /
-            (len(sts) - 2)
-            )
-    return (string, sts,  pred, accuracy)
+def task3(hm):
+    pass
 
 class HiddenMarkov:
     __alphs = None
