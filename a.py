@@ -57,6 +57,10 @@ class HiddenMarkov:
     __stnum = 0
     __states = None
     __delta = []
+    getAlphs = lambda self: self.__alphs
+    getStnum = lambda self: self.__stnum
+    getStates = lambda self: self.__states
+    getDelta = lambda self: self.__delta
     def __random(self, probabilities):
         rand = random.random() # 一様
         tmp = 0
