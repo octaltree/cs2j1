@@ -12,7 +12,7 @@ def main():
     join = lambda xs: ''.join(strs(xs))
     hm = HiddenMarkov()
     hm.read()
-    task2(hm)
+    task3(hm)
     return 0
 
 def task1(hm):
@@ -40,13 +40,13 @@ def task2(hm):
     print('文字列1000以上での正答率 {}'.format(numcorrect/num))
 
 def task3(hm):
-    pass
+    [hm.generate(100) for i in range(1)]
 
 class HiddenMarkov:
-    __alphs = None
-    __stnum = 0
-    __states = None
-    __delta = []
+    __alphs = None # :: (char,)
+    __stnum = 0 # :: int
+    __states = None # :: ((float,),)
+    __delta = [] # :: float[][]
     getAlphs = lambda self: self.__alphs
     getStnum = lambda self: self.__stnum
     getStates = lambda self: self.__states
