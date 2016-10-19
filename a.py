@@ -4,6 +4,7 @@ import sys
 import random
 import numpy as np
 import math
+from fractions import Fraction
 from functools import reduce
 undefined = None
 
@@ -40,7 +41,18 @@ def task2(hm):
     print('文字列1000以上での正答率 {}'.format(numcorrect/num))
 
 def task3(hm):
-    [hm.generate(100) for i in range(1)]
+    ts = [hm.generate(100) for i in range(1)]
+    #def obs(tmp, t):
+    #    # tmp 途中結果
+    #    # return = (states, delta)
+    #    (states, delta) = tmp
+    #    (string, sts) = t
+    #def toFloat(states, delta):
+    #    pass
+    #return toFloat(*reduce(obs, ts,
+    #    (None,
+    #        [[0 for i in range(n)] for j in range(n)])
+    #    )
 
 class HiddenMarkov:
     __alphs = None # :: (char,)
