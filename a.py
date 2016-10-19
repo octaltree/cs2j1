@@ -64,7 +64,7 @@ class HiddenMarkov:
             tmp += probabilities[i]
             if rand < tmp:
                 return i
-        return -1
+        return 1000000000000000
     def __trans(self, frm):
         return self.__random(self.__delta[frm])
     def __getAlpha(self, st):
