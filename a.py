@@ -161,7 +161,7 @@ class Viterbi:
         for idx in reversed(range(length + 1)):
             path = [current] + path
             current = np.argmax([
-                self.__dp[st][idx] + self.__delta[st][current]
+                self.__dp[st][idx] + self.__log(self.__delta[st][current])
                 for st in range(self.__stnum - 1)
                 ])
         path = [0] + path
