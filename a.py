@@ -54,8 +54,6 @@ def count(hm, ts):
     firstdelta = [[(0, 0) for i in range(hm.getStnum())]
             for j in range(hm.getStnum())]
     def obs(tmp, t):
-        # tmp 途中結果
-        # return = (states, delta)
         (states, delta) = tmp
         (string, sts) = t
         return tmp
