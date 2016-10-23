@@ -56,7 +56,13 @@ def count(hm, ts):
     def obs(tmp, t):
         (states, delta) = tmp
         (string, sts) = t
-        return tmp
+        def e(sts, string, states):
+            for (st, s) in zip(sts[1:-1], string):
+                pass
+            return states
+        def d(sts, delta):
+            return delta
+        return (e(sts, string, states), d(sts, delta))
     def fmt(states, delta):
         flt = lambda t: t[0] / t[1] if t[1] != 0 else 0
         finalstates = tuple([
