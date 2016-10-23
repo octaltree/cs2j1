@@ -95,7 +95,7 @@ class HiddenMarkov:
             tmp += probabilities[i]
             if rand < tmp:
                 return i
-        return 1000000000000000
+        raise Exception('確率の合計が1より小さい')
     def __trans(self, frm):
         return self.__random(self.__delta[frm])
     def __getAlpha(self, st):
