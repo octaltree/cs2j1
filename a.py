@@ -53,18 +53,16 @@ class Counter:
         def res(tmp, t):
             (states, delta) = tmp
             (string, sts) = t
-            def e(sts, string, states):
-                for (st, s) in zip(sts[1:-1], string):
-                    pass
-                return states
-            def d(sts, delta):
-                return delta
-            return (e(sts, string, states), d(sts, delta))
+            for (st, a) in zip(sts[1:-1], string):
+                states[st][''.join(self.__hm.getAlphs()).index(a)] += 1
+            for (frm, to) in zip(sts[:-1], sts[1:]):
+                delta[frm][to] +=  1
+            return (states, delta)
         return res
     def __fmt(self, states, delta):
         def flt(x, xs):
             s = sum(xs)
-            return x / xs if s != 0 else 0
+            return x / s if s != 0 else 0
         finalstates = tuple([
             None if st is None else tuple([flt(a, st) for a in st])
             for st in states])
