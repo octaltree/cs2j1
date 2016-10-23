@@ -42,26 +42,26 @@ def task2(hm):
 
 def task3(hm):
     ts = [hm.generate(100) for i in range(2)]
-    (states, delta) = count(hm, ts)
+    (states, delta) = Counter(hm).count(ts)
     print(states)
     print(delta)
 
-def count(hm, ts):
-    firststates = [np.zeros(len(hm.getAlphs())) for i in range(hm.getStnum())]
-    firststates[0] = None
-    firststates[-1] = None
-    firstdelta = np.zeros((hm.getStnum(), hm.getStnum()))
-    def obs(tmp, t):
-        (states, delta) = tmp
-        (string, sts) = t
-        def e(sts, string, states):
-            for (st, s) in zip(sts[1:-1], string):
-                pass
-            return states
-        def d(sts, delta):
-            return delta
-        return (e(sts, string, states), d(sts, delta))
-    def fmt(states, delta):
+class Counter:
+    def __init__(self, hm):
+        self.__hm = hm
+    def __obs(self):
+        def res(tmp, t):
+            (states, delta) = tmp
+            (string, sts) = t
+            def e(sts, string, states):
+                for (st, s) in zip(sts[1:-1], string):
+                    pass
+                return states
+            def d(sts, delta):
+                return delta
+            return (e(sts, string, states), d(sts, delta))
+        return res
+    def __fmt(self, states, delta):
         def flt(x, xs):
             s = sum(xs)
             return x / xs if s != 0 else 0
@@ -72,7 +72,14 @@ def count(hm, ts):
             [flt(to, frm) for to in frm]
             for frm in delta]
         return (finalstates, finaldelta)
-    return fmt(*reduce(obs, ts, (firststates, firstdelta)))
+    def count(self, ts):
+        firststates = [
+                np.zeros(len(self.__hm.getAlphs()))
+                for i in range(self.__hm.getStnum())]
+        firststates[0] = None
+        firststates[-1] = None
+        firstdelta = np.zeros((self.__hm.getStnum(), self.__hm.getStnum()))
+        return self.__fmt(*reduce(self.__obs(), ts, (firststates, firstdelta)))
 
 class HiddenMarkov:
     __alphs = None # :: (char,)
