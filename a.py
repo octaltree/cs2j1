@@ -41,10 +41,17 @@ def task2(hm):
     print('文字列1000以上での正答率 {}'.format(numcorrect/num))
 
 def task3(hm):
-    ts = [hm.generate(100) for i in range(2)]
+    ts = [hm.generate(100) for i in range(2000)]
     (states, delta) = Counter(hm).count(ts)
-    print(states)
-    print(delta)
+    err = (
+            sum([
+                sum([(t[0] - t[1]) ** 2 for t in list(zip(st[0], st[1]))])
+                for st in list(zip(hm.getStates(), states))[1:]]) +
+            sum([
+                sum([(to[0] - to[1]) ** 2 for to in list(zip(frm[0], frm[1]))])
+                for frm in list(zip(hm.getDelta(), delta))])
+            )
+    print(err)
 
 class Counter:
     def __init__(self, hm):
