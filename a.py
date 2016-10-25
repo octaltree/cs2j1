@@ -46,11 +46,11 @@ def task3(hm):
     print(diff((hm.getStates(), states), (hm.getDelta(), delta)))
 
 def task4(hm):
-    ss = [hm.generateGoaled(100)[0] for i in range(1000)]
+    ss = [hm.generateGoaled(100)[0] for i in range(1000)] # :: [String]
     hs = [ViterbiDecoding().randomHm(hm.getStnum(), len(hm.getAlphs())).calc()
-            for i in range(100)]
+            for i in range(100)] # :: [HiddenMarkov]
     es = [diff((hm.getStates(), i.getStates()), (hm.getDelta(), i.getDelta()))
-            for i in hs]
+            for i in hs] # :: [Num]
     print(min(es))
 
 def diff(sts, ds):
