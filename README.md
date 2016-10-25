@@ -1,7 +1,7 @@
-
-
+# 隠れマルコフモデル
+## usage
 ```
-source init.sh
-make
-./main.py < dice.txt
+source init.sh # pip & activate
+make # compile with cython
+./main.py 2 < dice.txt # 課題2
 ```
