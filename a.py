@@ -75,24 +75,32 @@ class ViterbiDecoding:
         self.__stnum = stnum
         self.__alphs = alphs
         # TODO 合計が1になるように
-        firststates = [np.random.rand(len(alphs)) for i in range(stnum)]
+        firststates = [self.__random(len(alphs)) for i in range(stnum)]
         firststates[0] = None
         firststates[-1] = None
-        firstdelta = np.random.rand(stnum, stnum)
+        firstdelta = [self.__random(stnum) for i in range(stnum)]
         for i in range(stnum):
             firstdelta[i][0] = 0
             firstdelta[stnum-1][i] = 0
         self.__hm = self.__newhm(firststates, firstdelta)
         return self
+    def __random(self, n):
+        # 合計が1以上なランダム列
+        while True:
+            tmp = np.random.rand(n)
+            if sum(tmp) >= 1:
+                return tmp
     def __newhm(self, states, delta):
         return HiddenMarkov(self.__alphs, self.__stnum, states, delta)
     def calc(self, ss):
         prepres = None
         while True:
             pres = [self.__hm.viterbi(s) for s in ss]
+            print(pres)
             if (prepres is not None and
                     all([i[0] == i[1] for i in list(zip(pres, prepres))])):
                 break
+            prepres = pres
             ts = list(zip(ss, pres))
             (st, dl) = Counter(self.__hm).count(ts)
             self.__hm = self.__newhm(st, dl)
