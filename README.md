@@ -3,5 +3,5 @@
 ```
 source init.sh # activate virtualbox & pip
 make # compile with cython
-./main.py 4 < dice.txt # 課題4
+./main.py 4 < data/dice.txt # 課題4
 ```
