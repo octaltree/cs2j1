@@ -116,6 +116,11 @@ class HiddenMarkov:
     getStnum = lambda self: self.__stnum
     getStates = lambda self: self.__states
     getDelta = lambda self: self.__delta
+    def __init__(self, alphs, stnum, states, delta):
+        self.__alphs = alphs
+        self.__stnum = stnum
+        self.__states = states
+        self.__delta = delta
     def __random(self, probabilities):
         rand = random.random() # 一様
         tmp = 0
