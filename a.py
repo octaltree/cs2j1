@@ -68,8 +68,9 @@ def rss(xs): # :: [(Num, Num)] -> Num
 class ViterbiDecoding:
     def __init__(self, hm=None):
         self.__hm = hm
-        self.__stnum = hm.getStnum()
-        self.__alphs = hm.getAlphs()
+        if self.__hm is not None:
+            self.__stnum = self.__hm.getStnum()
+            self.__alphs = self.__hm.getAlphs()
     def randomHm(self, stnum, alphs):
         self.__stnum = stnum
         self.__alphs = alphs
@@ -77,12 +78,21 @@ class ViterbiDecoding:
         firststates[0] = None
         firststates[-1] = None
         firstdelta = np.zeros((stnum, stnum))
-        self.__hm = self.__hm(firststates, firstdelta)
+        self.__hm = self.__newhm(firststates, firstdelta)
         return self
-    def __hm(self, states, delta):
+    def __newhm(self, states, delta):
         return HiddenMarkov(self.__alphs, self.__stnum, states, delta)
     def calc(self, ss):
-        return undefined
+        prepres = None
+        while True:
+            pres = [self.__hm.viterbi(s) for s in ss]
+            if (prepres is not None and
+                    all([i[0] == i[1] for i in list(zip(pres, prepres))])):
+                break
+            ts = list(zip(ss, pres))
+            (st, dl) = Counter(self.__hm).count(ts)
+            self.__hm = self.__newhm(st, dl)
+        return self.__hm
 
 class Counter:
     def __init__(self, hm):
