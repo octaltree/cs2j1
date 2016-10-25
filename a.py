@@ -47,7 +47,7 @@ def task3(hm):
 
 def task4(hm):
     ss = [hm.generateGoaled(100)[0] for i in range(1000)] # :: [String]
-    hs = [ViterbiDecoding().randomHm(hm.getStnum(), hm.getAlphs()).calc()
+    hs = [ViterbiDecoding().randomHm(hm.getStnum(), hm.getAlphs()).calc(ss)
             for i in range(100)] # :: [HiddenMarkov]
     es = [diff((hm.getStates(), i.getStates()), (hm.getDelta(), i.getDelta()))
             for i in hs] # :: [Num]
@@ -83,7 +83,7 @@ class ViterbiDecoding:
         return self
     def __hm(self, states, delta):
         return HiddenMarkov(self.__alphs, self.__stnum, states, delta)
-    def calc(self):
+    def calc(self, ss):
         return undefined
 
 class Counter:
