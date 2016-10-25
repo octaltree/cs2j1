@@ -1,6 +1,6 @@
 all: dice seven
 
-dice: a.py
-	./a.py < ./dice.txt
-seven: a.py
-	./a.py < ./sevenstates.txt
+dice: bg.pyx
+	./bg.pyx < ./dice.txt
+seven: bg.pyx
+	./bg.pyx < ./sevenstates.txt
