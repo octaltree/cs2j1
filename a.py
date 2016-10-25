@@ -68,15 +68,21 @@ def rss(xs): # :: [(Num, Num)] -> Num
 class ViterbiDecoding:
     def __init__(self, hm=None):
         self.__hm = hm
+        self.__stnum = hm.getStnum()
+        self.__alphs = hm.getAlphs()
     def randomHm(self, stnum, alphs):
+        self.__stnum = stnum
+        self.__alphs = alphs
         firststates = [
                 np.random.rand(len(alphs))
                 for i in range(stnum)]
         firststates[0] = None
         firststates[-1] = None
         firstdelta = np.zeros((stnum, stnum))
-        self.__hm = HiddenMarkov(alphs, stnum, firststates, firstdelta)
+        self.__hm = self.__hm(firststates, firstdelta)
         return self
+    def __hm(self, states, delta):
+        return HiddenMarkov(self.__alphs, self.__stnum, states, delta)
     def calc(self):
         return undefined
 
