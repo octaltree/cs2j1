@@ -1,6 +1,8 @@
-all: dice seven
+all: run
 
-dice: bg.pyx
-	./bg.pyx < ./dice.txt
-seven: bg.pyx
-	./bg.pyx < ./sevenstates.txt
+run: compile
+	python main.py < ./dice.txt
+	python main.py < ./sevenstates.txt
+
+compile: bg.pyx
+	python setup.py build_ext --inplace
