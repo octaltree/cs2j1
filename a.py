@@ -13,7 +13,7 @@ def main():
     join = lambda xs: ''.join(strs(xs))
     hm = HiddenMarkov()
     hm.read()
-    task3(hm)
+    task4(hm)
     return 0
 
 def task1(hm):
@@ -50,6 +50,9 @@ def task3(hm):
             flat1(squarezip(hm.getStates()[1:], states[1:])) +
             flat1(squarezip(hm.getDelta(), delta)))
     print(err)
+
+def task4(hm):
+    return undefined
 
 def rss(xs): # :: [(Num, Num)] -> Num
     return sum([(i[0] - i[1]) ** 2 for i in xs])
