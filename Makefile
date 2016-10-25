@@ -1,7 +1,9 @@
-all: run
+all: compile
 
-run: compile
+dice: compile
 	python main.py < ./dice.txt
+
+seven: compile
 	python main.py < ./sevenstates.txt
 
 compile: bg.pyx
