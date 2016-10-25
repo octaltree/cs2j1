@@ -74,10 +74,14 @@ class ViterbiDecoding:
     def randomHm(self, stnum, alphs):
         self.__stnum = stnum
         self.__alphs = alphs
+        # TODO 合計が1になるように
         firststates = [np.random.rand(len(alphs)) for i in range(stnum)]
         firststates[0] = None
         firststates[-1] = None
-        firstdelta = np.zeros((stnum, stnum))
+        firstdelta = np.random.rand(stnum, stnum)
+        for i in range(stnum):
+            firstdelta[i][0] = 0
+            firstdelta[stnum-1][i] = 0
         self.__hm = self.__newhm(firststates, firstdelta)
         return self
     def __newhm(self, states, delta):
