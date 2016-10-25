@@ -43,19 +43,36 @@ def task2(hm):
 def task3(hm):
     ts = [hm.generate(100) for i in range(2000)]
     (states, delta) = Counter(hm).count(ts)
+    print(diff((hm.getStates(), states), (hm.getDelta(), delta)))
+
+def task4(hm):
+    ss = [hm.generateGoaled(100)[0] for i in range(1000)]
+    hs = [ViterbiDecoding().randomHm(hm.getStnum(), len(hm.getAlphs())).calc()
+            for i in range(100)]
+    es = [diff((hm.getStates(), i.getStates()), (hm.getDelta(), i.getDelta()))
+            for i in hs]
+    print(min(es))
+
+def diff(sts, ds):
     flat1 = lambda xs: sum(xs, []) # :: [[a]] -> [a]
     # squarezip :: [[a]] -> [[b]] -> [[(a, b)]]
     squarezip = lambda a, b: [list(zip(i[0], i[1])) for i in list(zip(a, b))]
     err = rss(
-            flat1(squarezip(hm.getStates()[1:], states[1:])) +
-            flat1(squarezip(hm.getDelta(), delta)))
-    print(err)
-
-def task4(hm):
-    return undefined
+            flat1(squarezip(sts[0][1:], sts[1][1:])) +
+            flat1(squarezip(ds[0], ds[1])))
+    return err
 
 def rss(xs): # :: [(Num, Num)] -> Num
     return sum([(i[0] - i[1]) ** 2 for i in xs])
+
+class ViterbiDecoding:
+    def __init__(self, hm=None):
+        self.__hm = hm
+    def randomHm(self, stnum, numalphs):
+        self.__hm = undefined
+        return self
+    def calc(self):
+        return undefined
 
 class Counter:
     def __init__(self, hm):
