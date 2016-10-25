@@ -12,3 +12,4 @@ ${=pip} install --upgrade pip &&\
 echo activated  &&\
 
 ${=pip} install numpy &&\
+${=pip} install cython &&\
