@@ -73,9 +73,7 @@ class ViterbiDecoding:
     def randomHm(self, stnum, alphs):
         self.__stnum = stnum
         self.__alphs = alphs
-        firststates = [
-                np.random.rand(len(alphs))
-                for i in range(stnum)]
+        firststates = [np.random.rand(len(alphs)) for i in range(stnum)]
         firststates[0] = None
         firststates[-1] = None
         firstdelta = np.zeros((stnum, stnum))
