@@ -88,7 +88,7 @@ class ViterbiDecoding:
         while True:
             pres = [Viterbi(self.__hm).predict(s) for s in ss]
             if (prepres is not None and
-                    all([i[0] == i[1] for i in list(zip(pres, prepres))])):
+                    all([i[0] == i[1] for i in zip(pres, prepres)])):
                 break
             prepres = pres
             ts = list(zip(ss, pres))
