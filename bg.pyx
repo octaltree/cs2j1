@@ -29,7 +29,7 @@ def task2(hm):
     strs = lambda xs: [str(x) for x in xs]
     join = lambda xs: ''.join(strs(xs))
     print(' {0} \n{1}\n{2}'.format(xs[0][0], join(xs[0][1]), join(xs[0][2])))
-    num = np.sum([len(sts) - 2 for (string, sts, pred) in xs])
+    cdef int num = np.sum([len(sts) - 2 for (string, sts, pred) in xs])
     numcorrect = np.sum([
         len([t for t in list(zip(*x[1:3]))[1:-1] if t[0] == t[1]])
         for x in xs])
@@ -51,7 +51,7 @@ def task4(hm):
     es = [diff([
         (hm.getAlphabetProb(), i.getAlphabetProb()),
         (hm.getTransProb(), i.getTransProb())]) for i in hs]
-    e = min(es)
+    cdef DTYPE_t e = np.min(es)
     print(e)
 
 cdef double diff(ts):
@@ -64,13 +64,13 @@ class ViterbiDecoding:
         if self.__hm is not None:
             self.__stnum = self.__hm.getNumStates()
             self.__alphs = self.__hm.getAlphabets()
-    def randomHm(self, stnum, alphs):
+    def randomHm(self, int stnum, alphs):
         self.__stnum = stnum
         self.__alphs = alphs
-        firststates = np.zeros((stnum, len(alphs)))
+        cdef np.ndarray[DTYPE_t, ndim=2] firststates = np.zeros((stnum, len(alphs)))
         for i in range(stnum):
             firststates[i, :] = self.__random(len(alphs))
-        firstdelta = np.zeros((stnum, stnum))
+        cdef np.ndarray[DTYPE_t, ndim=2] firstdelta = np.zeros((stnum, stnum))
         for i in range(stnum-1):
             firstdelta[i, 1:] = self.__random(stnum-1)
         self.__hm = self.__newhm(firststates, firstdelta)
@@ -79,7 +79,7 @@ class ViterbiDecoding:
         # 合計が1以上なランダム列
         while True:
             tmp = np.random.rand(n)
-            if np.sum(tmp) >= 1:
+            if tmp.sum() >= 1:
                 return tmp
     def __newhm(self, states, delta):
         return HiddenMarkov(self.__stnum, self.__alphs, states, delta)
@@ -111,19 +111,19 @@ class Counter:
         return res
     def __fmt(self, states, delta):
         def flt(x, xs):
-            s = np.sum(xs)
+            cdef int s = np.sum(xs)
             return x / s if s != 0 else 0
-        finalstates = np.array([
+        cdef np.ndarray[DTYPE_t, ndim=2] finalstates = np.array([
             [flt(a, st) for a in st]
             for st in states])
-        finaldelta = np.array([
+        cdef np.ndarray[DTYPE_t, ndim=2] finaldelta = np.array([
             [flt(to, frm) for to in frm]
             for frm in delta])
         return (finalstates, finaldelta)
     def count(self, ts):
-        firststates = np.zeros(
+        cdef np.ndarray[DTYPE_t, ndim=2] firststates = np.zeros(
                 (self.__hm.getNumStates(), self.__hm.getNumAlphabets()))
-        firstdelta = np.zeros(
+        cdef np.ndarray[DTYPE_t, ndim=2] firstdelta = np.zeros(
                 (self.__hm.getNumStates(), self.__hm.getNumStates()))
         return self.__fmt(*reduce(self.__obs(), ts, (firststates, firstdelta)))
 
