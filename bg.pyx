@@ -20,14 +20,14 @@ def task1(hm):
 
 def task2(hm):
     xs = []
-    while np.sum([len(x[0]) for x in xs]) < 1000:
+    while np.sum([len(string) for (string, sts, pred) in xs]) < 1000:
         (string, sts) = hm.generateGoaled(100)
         pred = Viterbi(hm).predict(string)
-        xs += [(string, sts, pred)]
+        xs.append((string, sts, pred))
     strs = lambda xs: [str(x) for x in xs]
     join = lambda xs: ''.join(strs(xs))
-    print(' {0} \n{1}\n{2}'.format(xs[-1][0], join(xs[-1][1]), join(xs[-1][2])))
-    num = np.sum([len(x[1]) - 2 for x in xs])
+    print(' {0} \n{1}\n{2}'.format(xs[0][0], join(xs[0][1]), join(xs[0][2])))
+    num = np.sum([len(sts) - 2 for (string, sts, pred) in xs])
     numcorrect = np.sum([
         len([t for t in list(zip(*x[1:3]))[1:-1] if t[0] == t[1]])
         for x in xs])
