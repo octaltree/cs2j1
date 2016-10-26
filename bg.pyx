@@ -54,7 +54,7 @@ def task4(hm):
     e = min(es)
     print(e)
 
-def diff(ts):
+cdef double diff(ts):
     square = np.vectorize(lambda x: x * x)
     return np.sum([np.sum(square(a - b)) for (a, b) in ts])
 
