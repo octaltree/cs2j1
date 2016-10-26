@@ -6,6 +6,9 @@ import numpy as np
 import math
 from fractions import Fraction
 from functools import reduce
+cimport numpy as np
+DTYPE = np.float
+ctypedef np.float64_t DTYPE_t
 
 undefined = None
 
@@ -14,9 +17,8 @@ def task1(hm):
     print(hm.generate(maxlen=1))
     print(hm.generate(maxlen=2))
     print(hm.generate(maxlen=100))
-    print(hm.generateGoaled(maxlen=1))
     print(hm.generateGoaled(maxlen=2))
-    print(hm.generateGoaled(maxlen=100))
+    print(hm.generateGoaled(maxlen=50))
 
 def task2(hm):
     xs = []
@@ -84,7 +86,7 @@ class ViterbiDecoding:
             if np.sum(tmp) >= 1:
                 return tmp
     def __newhm(self, states, delta):
-        return HiddenMarkov(self.__alphs, self.__stnum, states, delta)
+        return HiddenMarkov(self.__stnum, self.__alphs, np.array(states), np.array(delta))
     def calc(self, ss):
         prepres = None
         while True:
@@ -142,39 +144,40 @@ class HiddenMarkov:
     getNumStates = lambda self: self.__numstates
     getAlphabetProb = lambda self: self.__alphabetprob
     getTransProb = lambda self: self.__transprob
-    def __init__(self, alphabets=None, numstates=0, alphabetprob=None, transprob=None):
+    def __init__(self, numstates=None, alphabets=None,
+            np.ndarray alphabetprob=None, np.ndarray transprob=None):
         self.__alphabets = alphabets
         self.__numstates = numstates
         self.__alphabetprob = alphabetprob
         self.__transprob = transprob
     def __random(self, probabilities):
-        rand = random.random() # 一様
-        tmp = 0
+        cdef double rand = random.random() # 一様
+        cdef double tmp = 0
         for i in range(len(probabilities)):
             tmp += probabilities[i]
             if rand < tmp:
                 return i
         raise Exception('確率の合計が1より小さい {}'.format(probabilities))
-    def __trans(self, frm):
-        return self.__random(self.__transprob[frm])
-    def __getAlpha(self, st):
-        return self.__alphabets[self.__random(self.__alphabetprob[st])]
-    def generate(self, maxlen=128):
-        currentst = 0
-        res = ""
+    def __trans(self, int frm):
+        return self.__random(self.getTransProb()[frm])
+    def __getAlph(self, int st):
+        return self.getAlphabets()[self.__random(self.getAlphabetProb()[st])]
+    def generate(self, int maxlen=128):
+        cdef int currentst = 0
+        string = ""
         sts = [0]
         for i in range(maxlen+1):
             if currentst != 0:
-                sts += [currentst]
-                if currentst == self.__numstates - 1:
+                sts.append(currentst)
+                if currentst == self.getNumStates() - 1:
                     break
-                res += self.__getAlpha(currentst)
+                string += self.__getAlph(currentst)
             currentst = self.__trans(currentst)
-        return (res, sts)
-    def generateGoaled(self, maxlen=128):
+        return (string, sts)
+    def generateGoaled(self, int maxlen=128):
         while True:
             tmp = self.generate(maxlen=maxlen)
-            if tmp[1][-1] == self.__numstates - 1:
+            if tmp[1][-1] == self.getNumStates() - 1:
                 return tmp
     def read(self):
         # ダメならindex out of rangeで死んで頼む
