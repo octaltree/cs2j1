@@ -42,12 +42,17 @@ def task3(hm):
     print(err)
 
 def task4(hm):
-    ss = [hm.generateGoaled(100)[0] for i in range(1000)] # :: [String]
-    hs = [ViterbiDecoding().randomHm(hm.getNumStates(), hm.getAlphabets()).calc(ss)
-            for i in range(100)] # :: [HiddenMarkov]
-    es = [diff((hm.getAlphabetProb(), i.getAlphabetProb()), (hm.getTransProb(), i.getTransProb()))
-            for i in hs] # :: [Num]
-    print(min(es))
+    ss = [hm.generateGoaled(100)[0] for i in range(1000)]
+    hs = [(
+        ViterbiDecoding()
+        .randomHm(hm.getNumStates(), hm.getAlphabets())
+        .calc(ss)
+        ) for i in range(100)]
+    es = [diff([
+        (hm.getAlphabetProb(), i.getAlphabetProb()),
+        (hm.getTransProb(), i.getTransProb())]) for i in hs]
+    e = min(es)
+    print(e)
 
 def diff(ts):
     square = np.vectorize(lambda x: x * x)
@@ -62,12 +67,12 @@ class ViterbiDecoding:
     def randomHm(self, stnum, alphs):
         self.__stnum = stnum
         self.__alphs = alphs
-        # TODO 合計が1になるように
-        firststates = [self.__random(len(alphs)) for i in range(stnum)]
-        firstdelta = [self.__random(stnum) for i in range(stnum)]
+        firststates = np.zeros((stnum, len(alphs)))
         for i in range(stnum):
-            firstdelta[i][0] = 0
-            firstdelta[stnum-1][i] = 0
+            firststates[i, :] = self.__random(len(alphs))
+        firstdelta = np.zeros((stnum, stnum))
+        for i in range(stnum-1):
+            firstdelta[i, 1:] = self.__random(stnum-1)
         self.__hm = self.__newhm(firststates, firstdelta)
         return self
     def __random(self, n):
@@ -77,12 +82,11 @@ class ViterbiDecoding:
             if np.sum(tmp) >= 1:
                 return tmp
     def __newhm(self, states, delta):
-        return HiddenMarkov(self.__stnum, self.__alphs, np.array(states), np.array(delta))
+        return HiddenMarkov(self.__stnum, self.__alphs, states, delta)
     def calc(self, ss):
         prepres = None
         while True:
             pres = [Viterbi(self.__hm).predict(s) for s in ss]
-            print(pres)
             if (prepres is not None and
                     all([i[0] == i[1] for i in list(zip(pres, prepres))])):
                 break
