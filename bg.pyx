@@ -22,7 +22,7 @@ def task2(hm):
     xs = []
     while np.sum([len(x[0]) for x in xs]) < 1000:
         (string, sts) = hm.generateGoaled(100)
-        pred = hm.viterbi(string)
+        pred = Viterbi(hm).predict(string)
         xs += [(string, sts, pred)]
     strs = lambda xs: [str(x) for x in xs]
     join = lambda xs: ''.join(strs(xs))
@@ -88,7 +88,7 @@ class ViterbiDecoding:
     def calc(self, ss):
         prepres = None
         while True:
-            pres = [self.__hm.viterbi(s) for s in ss]
+            pres = [Viterbi(self.__hm).predict(s) for s in ss]
             print(pres)
             if (prepres is not None and
                     all([i[0] == i[1] for i in list(zip(pres, prepres))])):
@@ -202,43 +202,38 @@ class HiddenMarkov:
             self.__transprob[t[0]][t[1]] = t[2]
     def debugVars(self):
         print(self.__dict__)
-    def viterbi(self, string):
-        v = Viterbi(self.__alphabets, self.__numstates, self.__alphabetprob, self.__transprob)
-        return v.predict(string)
 
 class Viterbi:
-    def __init__(self, alphs, stnum, states, delta):
-        self.__alphs = alphs
-        self.__stnum = stnum
-        self.__states = states
-        self.__delta = delta
+    def __init__(self, hm):
+        self.__hm = hm
     def __e(self, st, alph):
-        return self.__states[st][''.join(self.__alphs).index(alph)]
+        return self.__hm.getAlphabetprob()[st][
+                ''.join(self.__hm.getAlphabets()).index(alph)]
     def __log(self, x):
         return -np.inf if x == 0 else math.log(x)
     def __fill(self, string):
         for idx in range(len(string)):
-            for st in range(1, self.__stnum - 1):
+            for st in range(1, self.__hm.getNumstates() - 1):
                 m = np.max([
-                    self.__dp[j][idx] + self.__log(self.__delta[j][st])
-                    for j in range(self.__stnum - 1)
+                    self.__dp[j][idx] + self.__log(self.__hm.getTransprob()[j][st])
+                    for j in range(self.__hm.getNumstates() - 1)
                     ])
                 self.__dp[st][idx+1] = self.__log(self.__e(st, string[idx])) + m
     def __read(self, length):
-        current = self.__stnum - 1
+        current = self.__hm.getNumstates() - 1
         path = []
         for idx in reversed(range(length + 1)):
             path = [current] + path
             current = np.argmax([
-                self.__dp[st][idx] + self.__log(self.__delta[st][current])
-                for st in range(self.__stnum - 1)
+                self.__dp[st][idx] + self.__log(self.__hm.getTransprob()[st][current])
+                for st in range(self.__hm.getNumstates() - 1)
                 ])
         path = [0] + path
         return path
     def predict(self, string):
-        if self.__stnum == 2 or len(string) == 0:
-            return [0, self.__stnum - 1]
-        self.__dp = np.full((self.__stnum, len(string)+1), -np.inf)
+        if self.__hm.getNumstates() == 2 or len(string) == 0:
+            return np.array([0, self.__hm.getNumstates() - 1])
+        self.__dp = np.full((self.__hm.getNumstates(), len(string)+1), -np.inf)
         self.__dp[0][0] = 0
         self.__fill(string)
         return self.__read(len(string))
