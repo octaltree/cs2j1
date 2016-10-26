@@ -228,7 +228,7 @@ class HiddenMarkov:
 class Viterbi:
     def __init__(self, hm):
         self.__hm = hm
-    def __e(self, st, alph):
+    def __e(self, int st, alph):
         return self.__hm.getAlphabetProb()[st][
                 ''.join(self.__hm.getAlphabets()).index(alph)]
     def __log(self, x):
@@ -236,25 +236,28 @@ class Viterbi:
     def __fill(self, string):
         for idx in range(len(string)):
             for st in range(1, self.__hm.getNumStates() - 1):
-                m = np.max([
-                    self.__dp[j][idx] + self.__log(self.__hm.getTransProb()[j][st])
-                    for j in range(self.__hm.getNumStates() - 1)
-                    ])
-                self.__dp[st][idx+1] = self.__log(self.__e(st, string[idx])) + m
-    def __read(self, length):
-        current = self.__hm.getNumStates() - 1
+                self.__dp[st][idx+1] = (
+                        self.__log(self.__e(st, string[idx])) +
+                        np.max([
+                            dp[idx] + self.__log(tr[st])
+                            for (dp, tr) in zip(
+                                self.__dp[:-1],
+                                self.__hm.getTransProb()[:-1])]))
+    def __read(self, int length):
+        cdef int current = self.__hm.getNumStates() - 1
         path = []
         for idx in reversed(range(length + 1)):
             path = [current] + path
             current = np.argmax([
-                self.__dp[st][idx] + self.__log(self.__hm.getTransProb()[st][current])
-                for st in range(self.__hm.getNumStates() - 1)
-                ])
+                dp[idx] + self.__log(tr[current])
+                for (dp, tr) in zip(
+                    self.__dp[:-1],
+                    self.__hm.getTransProb()[:-1])])
         path = [0] + path
         return path
     def predict(self, string):
         if self.__hm.getNumStates() == 2 or len(string) == 0:
-            return np.array([0, self.__hm.getNumStates() - 1])
+            return [0, self.__hm.getNumStates() - 1]
         self.__dp = np.full((self.__hm.getNumStates(), len(string)+1), -np.inf)
         self.__dp[0][0] = 0
         self.__fill(string)
