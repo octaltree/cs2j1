@@ -20,15 +20,15 @@ def task1(hm):
 
 def task2(hm):
     xs = []
-    while sum([len(x[0]) for x in xs]) < 1000:
+    while np.sum([len(x[0]) for x in xs]) < 1000:
         (string, sts) = hm.generateGoaled(100)
         pred = hm.viterbi(string)
         xs += [(string, sts, pred)]
     strs = lambda xs: [str(x) for x in xs]
     join = lambda xs: ''.join(strs(xs))
     print(' {0} \n{1}\n{2}'.format(xs[-1][0], join(xs[-1][1]), join(xs[-1][2])))
-    num = sum([len(x[1]) - 2 for x in xs])
-    numcorrect = sum([
+    num = np.sum([len(x[1]) - 2 for x in xs])
+    numcorrect = np.sum([
         len([t for t in list(zip(*x[1:3]))[1:-1] if t[0] == t[1]])
         for x in xs])
     print('文字列1000以上での正答率 {}'.format(numcorrect/num))
@@ -36,13 +36,13 @@ def task2(hm):
 def task3(hm):
     ts = [hm.generate(100) for i in range(2000)]
     (states, delta) = Counter(hm).count(ts)
-    print(diff((hm.getStates(), states), (hm.getDelta(), delta)))
+    print(diff((hm.getAlphabetprob(), states), (hm.getTransprob(), delta)))
 
 def task4(hm):
     ss = [hm.generateGoaled(100)[0] for i in range(1000)] # :: [String]
-    hs = [ViterbiDecoding().randomHm(hm.getStnum(), hm.getAlphs()).calc(ss)
+    hs = [ViterbiDecoding().randomHm(hm.getNumstates(), hm.getAlphabets()).calc(ss)
             for i in range(100)] # :: [HiddenMarkov]
-    es = [diff((hm.getStates(), i.getStates()), (hm.getDelta(), i.getDelta()))
+    es = [diff((hm.getAlphabetprob(), i.getAlphabetprob()), (hm.getTransprob(), i.getTransprob()))
             for i in hs] # :: [Num]
     print(min(es))
 
@@ -56,14 +56,14 @@ def diff(sts, ds):
     return err
 
 def rss(xs): # :: [(Num, Num)] -> Num
-    return sum([(i[0] - i[1]) ** 2 for i in xs])
+    return np.sum([(i[0] - i[1]) ** 2 for i in xs])
 
 class ViterbiDecoding:
     def __init__(self, hm=None):
         self.__hm = hm
         if self.__hm is not None:
-            self.__stnum = self.__hm.getStnum()
-            self.__alphs = self.__hm.getAlphs()
+            self.__stnum = self.__hm.getNumstates()
+            self.__alphs = self.__hm.getAlphabets()
     def randomHm(self, stnum, alphs):
         self.__stnum = stnum
         self.__alphs = alphs
@@ -81,7 +81,7 @@ class ViterbiDecoding:
         # 合計が1以上なランダム列
         while True:
             tmp = np.random.rand(n)
-            if sum(tmp) >= 1:
+            if np.sum(tmp) >= 1:
                 return tmp
     def __newhm(self, states, delta):
         return HiddenMarkov(self.__alphs, self.__stnum, states, delta)
@@ -107,14 +107,14 @@ class Counter:
             (states, delta) = tmp
             (string, sts) = t
             for (st, a) in zip(sts[1:-1], string):
-                states[st][''.join(self.__hm.getAlphs()).index(a)] += 1
+                states[st][''.join(self.__hm.getAlphabets()).index(a)] += 1
             for (frm, to) in zip(sts[:-1], sts[1:]):
                 delta[frm][to] +=  1
             return (states, delta)
         return res
     def __fmt(self, states, delta):
         def flt(x, xs):
-            s = sum(xs)
+            s = np.sum(xs)
             return x / s if s != 0 else 0
         finalstates = tuple([
             None if st is None else tuple([flt(a, st) for a in st])
@@ -125,27 +125,27 @@ class Counter:
         return (finalstates, finaldelta)
     def count(self, ts):
         firststates = [
-                np.zeros(len(self.__hm.getAlphs()))
-                for i in range(self.__hm.getStnum())]
+                np.zeros(len(self.__hm.getAlphabets()))
+                for i in range(self.__hm.getNumstates())]
         firststates[0] = None
         firststates[-1] = None
-        firstdelta = np.zeros((self.__hm.getStnum(), self.__hm.getStnum()))
+        firstdelta = np.zeros((self.__hm.getNumstates(), self.__hm.getNumstates()))
         return self.__fmt(*reduce(self.__obs(), ts, (firststates, firstdelta)))
 
 class HiddenMarkov:
-    __alphs = None # :: (char,)
-    __stnum = 0 # :: int
-    __states = None # :: ((float,),)
-    __delta = [] # :: float[][]
-    getAlphs = lambda self: self.__alphs
-    getStnum = lambda self: self.__stnum
-    getStates = lambda self: self.__states
-    getDelta = lambda self: self.__delta
-    def __init__(self, alphs=None, stnum=0, states=None, delta=None):
-        self.__alphs = alphs
-        self.__stnum = stnum
-        self.__states = states
-        self.__delta = delta
+    __alphabets = None # :: (char,)
+    __numstates = 0 # :: int
+    __alphabetprob = None # :: ((float,),)
+    __transprob = [] # :: float[][]
+    getAlphabets = lambda self: self.__alphabets
+    getNumstates = lambda self: self.__numstates
+    getAlphabetprob = lambda self: self.__alphabetprob
+    getTransprob = lambda self: self.__transprob
+    def __init__(self, alphabets=None, numstates=0, alphabetprob=None, transprob=None):
+        self.__alphabets = alphabets
+        self.__numstates = numstates
+        self.__alphabetprob = alphabetprob
+        self.__transprob = transprob
     def __random(self, probabilities):
         rand = random.random() # 一様
         tmp = 0
@@ -155,9 +155,9 @@ class HiddenMarkov:
                 return i
         raise Exception('確率の合計が1より小さい {}'.format(probabilities))
     def __trans(self, frm):
-        return self.__random(self.__delta[frm])
+        return self.__random(self.__transprob[frm])
     def __getAlpha(self, st):
-        return self.__alphs[self.__random(self.__states[st])]
+        return self.__alphabets[self.__random(self.__alphabetprob[st])]
     def generate(self, maxlen=128):
         currentst = 0
         res = ""
@@ -165,7 +165,7 @@ class HiddenMarkov:
         for i in range(maxlen+1):
             if currentst != 0:
                 sts += [currentst]
-                if currentst == self.__stnum - 1:
+                if currentst == self.__numstates - 1:
                     break
                 res += self.__getAlpha(currentst)
             currentst = self.__trans(currentst)
@@ -173,7 +173,7 @@ class HiddenMarkov:
     def generateGoaled(self, maxlen=128):
         while True:
             tmp = self.generate(maxlen=maxlen)
-            if tmp[1][-1] == self.__stnum - 1:
+            if tmp[1][-1] == self.__numstates - 1:
                 return tmp
     def read(self):
         # ダメならindex out of rangeで死んで頼む
@@ -182,28 +182,28 @@ class HiddenMarkov:
         tmpdelta  = []
         for line in lines:
             if line.replace('\n', '').split(' ')[0] == 'sigma':
-                self.__alphs = tuple(line.split(' ')[1:])
+                self.__alphabets = tuple(line.split(' ')[1:])
             elif line.replace('\n', '').split(' ')[0] == 'stnum':
-                self.__stnum = int(line.split(' ')[1])
+                self.__numstates = int(line.split(' ')[1])
             elif line.replace('\n', '').split(' ')[0] == 'state':
                 statelines += [line]
             elif line.replace('\n', '').split(' ')[0] == 'delta':
                 splited = line.split(' ')
                 tmpdelta += [
                         (int(splited[1]), int(splited[2]), float(splited[3]))]
-        flat1 = lambda ls: sum(ls, [])
+        flat1 = lambda ls: np.sum(ls, [])
         sortedstate = sorted(statelines, key=lambda l: l.split(' ')[1])
-        self.__states = tuple([None] +
+        self.__alphabetprob = tuple([None] +
                 [tuple([float(c) for c in l.split(' ')[2:]]) for l in sortedstate]
                 )
-        n = self.__stnum
-        self.__delta = [[0 for i in range(n)] for j in range(n)]
+        n = self.__numstates
+        self.__transprob = [[0 for i in range(n)] for j in range(n)]
         for t in tmpdelta:
-            self.__delta[t[0]][t[1]] = t[2]
+            self.__transprob[t[0]][t[1]] = t[2]
     def debugVars(self):
         print(self.__dict__)
     def viterbi(self, string):
-        v = Viterbi(self.__alphs, self.__stnum, self.__states, self.__delta)
+        v = Viterbi(self.__alphabets, self.__numstates, self.__alphabetprob, self.__transprob)
         return v.predict(string)
 
 class Viterbi:
