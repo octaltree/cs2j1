@@ -36,13 +36,13 @@ def task2(hm):
 def task3(hm):
     ts = [hm.generate(100) for i in range(2000)]
     (states, delta) = Counter(hm).count(ts)
-    print(diff((hm.getAlphabetprob(), states), (hm.getTransprob(), delta)))
+    print(diff((hm.getAlphabetProb(), states), (hm.getTransProb(), delta)))
 
 def task4(hm):
     ss = [hm.generateGoaled(100)[0] for i in range(1000)] # :: [String]
-    hs = [ViterbiDecoding().randomHm(hm.getNumstates(), hm.getAlphabets()).calc(ss)
+    hs = [ViterbiDecoding().randomHm(hm.getNumStates(), hm.getAlphabets()).calc(ss)
             for i in range(100)] # :: [HiddenMarkov]
-    es = [diff((hm.getAlphabetprob(), i.getAlphabetprob()), (hm.getTransprob(), i.getTransprob()))
+    es = [diff((hm.getAlphabetProb(), i.getAlphabetProb()), (hm.getTransProb(), i.getTransProb()))
             for i in hs] # :: [Num]
     print(min(es))
 
@@ -62,7 +62,7 @@ class ViterbiDecoding:
     def __init__(self, hm=None):
         self.__hm = hm
         if self.__hm is not None:
-            self.__stnum = self.__hm.getNumstates()
+            self.__stnum = self.__hm.getNumStates()
             self.__alphs = self.__hm.getAlphabets()
     def randomHm(self, stnum, alphs):
         self.__stnum = stnum
@@ -126,10 +126,10 @@ class Counter:
     def count(self, ts):
         firststates = [
                 np.zeros(len(self.__hm.getAlphabets()))
-                for i in range(self.__hm.getNumstates())]
+                for i in range(self.__hm.getNumStates())]
         firststates[0] = None
         firststates[-1] = None
-        firstdelta = np.zeros((self.__hm.getNumstates(), self.__hm.getNumstates()))
+        firstdelta = np.zeros((self.__hm.getNumStates(), self.__hm.getNumStates()))
         return self.__fmt(*reduce(self.__obs(), ts, (firststates, firstdelta)))
 
 class HiddenMarkov:
@@ -138,9 +138,10 @@ class HiddenMarkov:
     __alphabetprob = None # :: ((float,),)
     __transprob = [] # :: float[][]
     getAlphabets = lambda self: self.__alphabets
-    getNumstates = lambda self: self.__numstates
-    getAlphabetprob = lambda self: self.__alphabetprob
-    getTransprob = lambda self: self.__transprob
+    getNumAlphabets = lambda self: len(self.__alphabets)
+    getNumStates = lambda self: self.__numstates
+    getAlphabetProb = lambda self: self.__alphabetprob
+    getTransProb = lambda self: self.__transprob
     def __init__(self, alphabets=None, numstates=0, alphabetprob=None, transprob=None):
         self.__alphabets = alphabets
         self.__numstates = numstates
@@ -178,28 +179,46 @@ class HiddenMarkov:
     def read(self):
         # ダメならindex out of rangeで死んで頼む
         lines = sys.stdin.read().split('\n')
-        statelines = []
-        tmpdelta  = []
+        self.__numstates = int([
+            l.split(' ')[1]
+            for l in lines if l.split(' ')[0] == 'stnum'
+            ][-1])
+        self.__alphabets = [
+            l.split(' ')[1:]
+            for l in lines if l.split(' ')[0] == 'sigma'
+            ][-1]
+        self.__alphabetprob = np.zeros(
+                (self.getNumStates(), self.getNumAlphabets()))
+        self.__transprob = np.zeros(
+                (self.getNumStates(), self.getNumStates()))
         for line in lines:
-            if line.replace('\n', '').split(' ')[0] == 'sigma':
-                self.__alphabets = tuple(line.split(' ')[1:])
-            elif line.replace('\n', '').split(' ')[0] == 'stnum':
-                self.__numstates = int(line.split(' ')[1])
-            elif line.replace('\n', '').split(' ')[0] == 'state':
-                statelines += [line]
-            elif line.replace('\n', '').split(' ')[0] == 'delta':
-                splited = line.split(' ')
-                tmpdelta += [
-                        (int(splited[1]), int(splited[2]), float(splited[3]))]
-        flat1 = lambda ls: np.sum(ls, [])
-        sortedstate = sorted(statelines, key=lambda l: l.split(' ')[1])
-        self.__alphabetprob = tuple([None] +
-                [tuple([float(c) for c in l.split(' ')[2:]]) for l in sortedstate]
-                )
-        n = self.__numstates
-        self.__transprob = [[0 for i in range(n)] for j in range(n)]
-        for t in tmpdelta:
-            self.__transprob[t[0]][t[1]] = t[2]
+            cols = line.split(' ')
+            if cols[0] == 'state':
+                self.__alphabetprob[int(cols[1])][:] = np.array(cols[2:])
+            elif cols[0] == 'delta':
+                self.__transprob[int(cols[1])][int(cols[2])] = cols[3]
+        #statelines = []
+        #tmpdelta  = []
+        #for line in lines:
+        #    if line.replace('\n', '').split(' ')[0] == 'sigma':
+        #        self.__alphabets = tuple(line.split(' ')[1:])
+        #    elif line.replace('\n', '').split(' ')[0] == 'stnum':
+        #        self.__numstates = int(line.split(' ')[1])
+        #    elif line.replace('\n', '').split(' ')[0] == 'state':
+        #        statelines += [line]
+        #    elif line.replace('\n', '').split(' ')[0] == 'delta':
+        #        splited = line.split(' ')
+        #        tmpdelta += [
+        #                (int(splited[1]), int(splited[2]), float(splited[3]))]
+        #flat1 = lambda ls: np.sum(ls, [])
+        #sortedstate = sorted(statelines, key=lambda l: l.split(' ')[1])
+        #self.__alphabetprob = tuple([None] +
+        #        [tuple([float(c) for c in l.split(' ')[2:]]) for l in sortedstate]
+        #        )
+        #n = self.__numstates
+        #self.__transprob = [[0 for i in range(n)] for j in range(n)]
+        #for t in tmpdelta:
+        #    self.__transprob[t[0]][t[1]] = t[2]
     def debugVars(self):
         print(self.__dict__)
 
@@ -207,33 +226,33 @@ class Viterbi:
     def __init__(self, hm):
         self.__hm = hm
     def __e(self, st, alph):
-        return self.__hm.getAlphabetprob()[st][
+        return self.__hm.getAlphabetProb()[st][
                 ''.join(self.__hm.getAlphabets()).index(alph)]
     def __log(self, x):
         return -np.inf if x == 0 else math.log(x)
     def __fill(self, string):
         for idx in range(len(string)):
-            for st in range(1, self.__hm.getNumstates() - 1):
+            for st in range(1, self.__hm.getNumStates() - 1):
                 m = np.max([
-                    self.__dp[j][idx] + self.__log(self.__hm.getTransprob()[j][st])
-                    for j in range(self.__hm.getNumstates() - 1)
+                    self.__dp[j][idx] + self.__log(self.__hm.getTransProb()[j][st])
+                    for j in range(self.__hm.getNumStates() - 1)
                     ])
                 self.__dp[st][idx+1] = self.__log(self.__e(st, string[idx])) + m
     def __read(self, length):
-        current = self.__hm.getNumstates() - 1
+        current = self.__hm.getNumStates() - 1
         path = []
         for idx in reversed(range(length + 1)):
             path = [current] + path
             current = np.argmax([
-                self.__dp[st][idx] + self.__log(self.__hm.getTransprob()[st][current])
-                for st in range(self.__hm.getNumstates() - 1)
+                self.__dp[st][idx] + self.__log(self.__hm.getTransProb()[st][current])
+                for st in range(self.__hm.getNumStates() - 1)
                 ])
         path = [0] + path
         return path
     def predict(self, string):
-        if self.__hm.getNumstates() == 2 or len(string) == 0:
-            return np.array([0, self.__hm.getNumstates() - 1])
-        self.__dp = np.full((self.__hm.getNumstates(), len(string)+1), -np.inf)
+        if self.__hm.getNumStates() == 2 or len(string) == 0:
+            return np.array([0, self.__hm.getNumStates() - 1])
+        self.__dp = np.full((self.__hm.getNumStates(), len(string)+1), -np.inf)
         self.__dp[0][0] = 0
         self.__fill(string)
         return self.__read(len(string))
